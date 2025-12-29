@@ -1,28 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
+  // Simulated email/password sign in
   const handleSignIn = (e) => {
     e.preventDefault();
-    // simulate sign in
     login({ name: email.split("@")[0] || "Learner", role: "student", token: "abc123" });
   };
 
+  // Simulated sign up
   const handleSignUp = (e) => {
     e.preventDefault();
-    // simulate registration then sign in
     setMessage("Account created — signing you in...");
     setTimeout(() => {
       login({ name: name || email.split("@")[0] || "NewLearner", role: "student", token: "abc123" });
     }, 800);
   };
+
+  // Google OAuth redirect
+  const handleGoogleLogin = () => {
+    console.log("Redirecting to Google OAuth...");
+    const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.location.href = `${base}/auth/google`;
+  };
+
+  // GitHub OAuth redirect (if implemented)
+  const handleGitHubLogin = () => {
+    console.log("Redirecting to GitHub OAuth...");
+    const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.location.href = `${base}/auth/github`;
+  };
+
+  // Handle OAuth callback: token and user JSON come as query params
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const userParam = searchParams.get('user');
+    if (token) {
+      try {
+        if (userParam) {
+          localStorage.setItem('token', token);
+        } else {
+          localStorage.setItem('token', token);
+        }
+        // Let AuthProvider validate token and fetch user, then navigate
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('OAuth callback handling error', err);
+      }
+    }
+  }, [searchParams, navigate]);
 
   return (
     <main className="auth-page">
@@ -53,8 +89,12 @@ export default function Login() {
 
           <div className="divider">Or continue with</div>
           <div className="social-buttons">
-            <button className="btn-secondary">Continue with Google</button>
-            <button className="btn-secondary">Continue with GitHub</button>
+            <button className="btn-secondary" onClick={handleGoogleLogin}>
+              Continue with Google
+            </button>
+            <button className="btn-secondary" onClick={handleGitHubLogin}>
+              Continue with GitHub
+            </button>
           </div>
 
           {message && <p className="muted">{message}</p>}
