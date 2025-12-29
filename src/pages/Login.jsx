@@ -239,33 +239,7 @@ export default function Login() {
             )}
           </div>
 
-          <div className="auth-footer">
-            <div className="benefits">
-              <div className="benefit-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-                <span>Hands-on lab sessions</span>
-              </div>
-              <div className="benefit-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                <span>Expert mentorship</span>
-              </div>
-              <div className="benefit-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                </svg>
-                <span>Real-world projects</span>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -281,7 +255,7 @@ export default function Login() {
 
         .auth-container {
           width: 100%;
-          max-width: 900px;
+          max-width: 520px;
         }
 
         .auth-card {
@@ -340,7 +314,7 @@ export default function Login() {
         .auth-tabs {
           display: flex;
           gap: 0.5rem;
-          padding: 1.5rem 4rem 0;
+          padding: 1.5rem 2rem 0;
           background: white;
         }
 
@@ -367,7 +341,7 @@ export default function Login() {
         }
 
         .auth-body {
-          padding: 3rem 4rem;
+          padding: 2rem;
         }
 
         .social-login {
@@ -534,30 +508,7 @@ export default function Login() {
           color: #991b1b;
         }
 
-        .auth-footer {
-          padding: 2rem 4rem 2.5rem;
-          background: #f8fafc;
-          border-top: 1px solid #e2e8f0;
-        }
 
-        .benefits {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-        }
-
-        .benefit-item {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          color: #475569;
-          font-size: 0.875rem;
-        }
-
-        .benefit-item svg {
-          color: #667eea;
-          flex-shrink: 0;
-        }
 
         @media (max-width: 640px) {
           .auth-page {
@@ -576,9 +527,7 @@ export default function Login() {
             padding: 1.25rem 1.5rem 0;
           }
 
-          .auth-footer {
-            padding: 1.25rem 1.5rem 1.5rem;
-          }
+
         }
       `}</style>
     </main>
