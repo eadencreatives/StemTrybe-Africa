@@ -1,105 +1,135 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
-  // Handle OAuth callback: token and user JSON come as query params
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
-    
-    if (token && userParam) {
-      try {
-        // Parse user data from URL
-        const userData = JSON.parse(decodeURIComponent(userParam));
-        
-        // Save token to localStorage
-        localStorage.setItem('token', token);
-        
-        // Log user in through AuthContext
-        login({
-          name: userData.name,
-          email: userData.email,
-          role: userData.role || 'student',
-          token: token,
-          id: userData.id
-        });
-        
-        // Navigate to dashboard
-        navigate('/dashboard');
-      } catch (err) {
-        console.error('OAuth callback handling error', err);
-        setMessage('Login failed. Please try again.');
-      }
-    }
-  }, [searchParams, navigate, login]);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Simulated email/password sign in
-  const handleSignIn = (e) => {
-    e.preventDefault();
-    login({ name: email.split("@")[0] || "Learner", role: "student", token: "abc123" });
+  // =========================
+  // Handle OAuth callback
+  // =========================
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      fetchCurrentUser(token);
+    }
+  }, [searchParams]);
+
+  // =========================
+  // Fetch logged-in user
+  // =========================
+  const fetchCurrentUser = async (token) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user");
+
+      const user = await res.json();
+
+      login({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role || "student",
+        token
+      });
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setMessage("Login failed. Please try again.");
+    }
   };
 
-  // Simulated sign up
+  // =========================
+  // Simulated email/password
+  // =========================
+  const handleSignIn = (e) => {
+    e.preventDefault();
+    login({ name: email.split("@")[0], role: "student", token: "abc123" });
+    navigate("/dashboard");
+  };
+
   const handleSignUp = (e) => {
     e.preventDefault();
     setMessage("Account created — signing you in...");
     setTimeout(() => {
-      login({ name: name || email.split("@")[0] || "NewLearner", role: "student", token: "abc123" });
+      login({ name, role: "student", token: "abc123" });
+      navigate("/dashboard");
     }, 800);
   };
 
-  // Google OAuth redirect
+  // =========================
+  // OAuth redirects
+  // =========================
   const handleGoogleLogin = () => {
-    console.log("Redirecting to Google OAuth...");
-    const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    window.location.href = `${base}/auth/google`;
+    window.location.href = `${API_URL}/auth/google`;
   };
 
-  // GitHub OAuth redirect
   const handleGitHubLogin = () => {
-    console.log("Redirecting to GitHub OAuth...");
-    const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    window.location.href = `${base}/auth/github`;
+    window.location.href = `${API_URL}/auth/github`;
   };
 
+  // =========================
+  // UI
+  // =========================
   return (
     <main className="auth-page">
       <div className="auth-card">
         <div className="auth-left">
           <h2>{mode === "signin" ? "Welcome Back" : "Create your account"}</h2>
-          <p className="muted">Join STEMTRIBE Africa — learn, build and connect with mentors.</p>
+          <p className="muted">
+            Join STEMTRIBE Africa — learn, build and connect with mentors.
+          </p>
 
           <div className="auth-tabs">
-            <button className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")}>Sign In</button>
-            <button className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>Sign Up</button>
+            <button
+              className={mode === "signin" ? "active" : ""}
+              onClick={() => setMode("signin")}
+            >
+              Sign In
+            </button>
+            <button
+              className={mode === "signup" ? "active" : ""}
+              onClick={() => setMode("signup")}
+            >
+              Sign Up
+            </button>
           </div>
 
           {mode === "signin" ? (
             <form className="auth-form" onSubmit={handleSignIn}>
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
-              <button className="btn-primary" type="submit">Sign In</button>
+              <button className="btn-primary">Sign In</button>
             </form>
           ) : (
             <form className="auth-form" onSubmit={handleSignUp}>
               <input value={name} onChange={e => setName(e.target.value)} placeholder="Full name" required />
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create password" required />
-              <button className="btn-primary" type="submit">Create Account</button>
+              <button className="btn-primary">Create Account</button>
             </form>
           )}
 
           <div className="divider">Or continue with</div>
+
           <div className="social-buttons">
             <button className="btn-secondary" onClick={handleGoogleLogin}>
               Continue with Google
@@ -111,16 +141,6 @@ export default function Login() {
 
           {message && <p className="muted">{message}</p>}
         </div>
-
-        <aside className="auth-right">
-          <h3>Why join?</h3>
-          <ul>
-            <li>Hands-on lab sessions</li>
-            <li>Mentorship and career pathways</li>
-            <li>Projects, hackathons and real-world experience</li>
-          </ul>
-          <p className="muted">Signing up connects you to our learning community and opportunities.</p>
-        </aside>
       </div>
     </main>
   );
