@@ -326,7 +326,7 @@ export default function Login() {
         .submit-btn {
           width: 100%;
           padding: 0.875rem;
-          background: #10b981;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           border: none;
           border-radius: 4px;
@@ -338,7 +338,7 @@ export default function Login() {
         }
 
         .submit-btn:hover:not(:disabled) {
-          background: #059669;
+          background: linear-gradient(135deg, #5568d3 0%, #65408b 100%);
         }
 
         .submit-btn:disabled {
