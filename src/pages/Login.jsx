@@ -281,7 +281,7 @@ export default function Login() {
 
         .auth-container {
           width: 100%;
-          max-width: 480px;
+          max-width: 900px;
         }
 
         .auth-card {
@@ -340,7 +340,7 @@ export default function Login() {
         .auth-tabs {
           display: flex;
           gap: 0.5rem;
-          padding: 1.5rem 2rem 0;
+          padding: 1.5rem 4rem 0;
           background: white;
         }
 
@@ -367,7 +367,7 @@ export default function Login() {
         }
 
         .auth-body {
-          padding: 2rem;
+          padding: 3rem 4rem;
         }
 
         .social-login {
@@ -535,15 +535,15 @@ export default function Login() {
         }
 
         .auth-footer {
-          padding: 1.5rem 2rem 2rem;
+          padding: 2rem 4rem 2.5rem;
           background: #f8fafc;
           border-top: 1px solid #e2e8f0;
         }
 
         .benefits {
-          display: flex;
-          flex-direction: column;
-          gap: 0.875rem;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
         }
 
         .benefit-item {
