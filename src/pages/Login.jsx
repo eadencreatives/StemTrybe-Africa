@@ -12,6 +12,37 @@ export default function Login() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
+  // Handle OAuth callback: token and user JSON come as query params
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const userParam = searchParams.get('user');
+    
+    if (token && userParam) {
+      try {
+        // Parse user data from URL
+        const userData = JSON.parse(decodeURIComponent(userParam));
+        
+        // Save token to localStorage
+        localStorage.setItem('token', token);
+        
+        // Log user in through AuthContext
+        login({
+          name: userData.name,
+          email: userData.email,
+          role: userData.role || 'student',
+          token: token,
+          id: userData.id
+        });
+        
+        // Navigate to dashboard
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('OAuth callback handling error', err);
+        setMessage('Login failed. Please try again.');
+      }
+    }
+  }, [searchParams, navigate, login]);
+
   // Simulated email/password sign in
   const handleSignIn = (e) => {
     e.preventDefault();
@@ -34,31 +65,12 @@ export default function Login() {
     window.location.href = `${base}/auth/google`;
   };
 
-  // GitHub OAuth redirect (if implemented)
+  // GitHub OAuth redirect
   const handleGitHubLogin = () => {
     console.log("Redirecting to GitHub OAuth...");
     const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     window.location.href = `${base}/auth/github`;
   };
-
-  // Handle OAuth callback: token and user JSON come as query params
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
-    if (token) {
-      try {
-        if (userParam) {
-          localStorage.setItem('token', token);
-        } else {
-          localStorage.setItem('token', token);
-        }
-        // Let AuthProvider validate token and fetch user, then navigate
-        navigate('/dashboard');
-      } catch (err) {
-        console.error('OAuth callback handling error', err);
-      }
-    }
-  }, [searchParams, navigate]);
 
   return (
     <main className="auth-page">
