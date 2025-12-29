@@ -16,38 +16,41 @@ export default function Login() {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   // =========================
-  // Handle OAuth callback
+  // Handle OAuth callback (FIXED)
   // =========================
   useEffect(() => {
     const token = searchParams.get("token");
+    if (!token) return;
 
-    if (token) {
-      localStorage.setItem("token", token);
-      fetchCurrentUser(token);
-    }
-  }, [searchParams]);
+    localStorage.setItem("token", token);
+    fetchCurrentUser(token);
+
+    // clean URL to prevent re-trigger
+    navigate("/login", { replace: true });
+  }, []);
 
   // =========================
-  // Fetch logged-in user
+  // Fetch logged-in user (FIXED)
   // =========================
   const fetchCurrentUser = async (token) => {
     try {
       const res = await fetch(`${API_URL}/api/auth/me`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Failed to fetch user");
 
-      const user = await res.json();
+      const data = await res.json();
+      const user = data.user || data;
 
       login({
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role || "student",
-        token
+        token,
       });
 
       navigate("/dashboard");
@@ -58,7 +61,7 @@ export default function Login() {
   };
 
   // =========================
-  // Simulated email/password
+  // Email/password (mock)
   // =========================
   const handleSignIn = (e) => {
     e.preventDefault();
@@ -76,7 +79,7 @@ export default function Login() {
   };
 
   // =========================
-  // OAuth redirects
+  // OAuth redirects (CORRECT)
   // =========================
   const handleGoogleLogin = () => {
     window.location.href = `${API_URL}/auth/google`;
@@ -86,17 +89,11 @@ export default function Login() {
     window.location.href = `${API_URL}/auth/github`;
   };
 
-  // =========================
-  // UI
-  // =========================
   return (
     <main className="auth-page">
       <div className="auth-card">
         <div className="auth-left">
           <h2>{mode === "signin" ? "Welcome Back" : "Create your account"}</h2>
-          <p className="muted">
-            Join STEMTRIBE Africa — learn, build and connect with mentors.
-          </p>
 
           <div className="auth-tabs">
             <button
@@ -114,32 +111,26 @@ export default function Login() {
           </div>
 
           {mode === "signin" ? (
-            <form className="auth-form" onSubmit={handleSignIn}>
+            <form onSubmit={handleSignIn}>
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
-              <button className="btn-primary">Sign In</button>
+              <button>Sign In</button>
             </form>
           ) : (
-            <form className="auth-form" onSubmit={handleSignUp}>
+            <form onSubmit={handleSignUp}>
               <input value={name} onChange={e => setName(e.target.value)} placeholder="Full name" required />
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create password" required />
-              <button className="btn-primary">Create Account</button>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
+              <button>Create Account</button>
             </form>
           )}
 
           <div className="divider">Or continue with</div>
 
-          <div className="social-buttons">
-            <button className="btn-secondary" onClick={handleGoogleLogin}>
-              Continue with Google
-            </button>
-            <button className="btn-secondary" onClick={handleGitHubLogin}>
-              Continue with GitHub
-            </button>
-          </div>
+          <button onClick={handleGoogleLogin}>Continue with Google</button>
+          <button onClick={handleGitHubLogin}>Continue with GitHub</button>
 
-          {message && <p className="muted">{message}</p>}
+          {message && <p>{message}</p>}
         </div>
       </div>
     </main>
