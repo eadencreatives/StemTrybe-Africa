@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses } from '../services/courses';
+import { useAuth } from "../context/AuthContext";
 
 export default function Dashboard() {
+  const { user, logout } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch courses
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -26,8 +29,9 @@ export default function Dashboard() {
   return (
     <main className="dashboard">
       <header>
-        <h1>Your Dashboard</h1>
-        <p>Quick access to your courses and progress.</p>
+        <h1>Welcome, {user?.name}</h1>
+        <p>Role: {user?.role}</p>
+        <button onClick={logout}>Logout</button>
       </header>
 
       <section className="courses-grid">
@@ -40,19 +44,5 @@ export default function Dashboard() {
         ))}
       </section>
     </main>
-  );
-}
-import { useAuth } from "../context/AuthContext";
-
-export default function Dashboard() {
-  const { user, logout } = useAuth();
-
-  return (
-    <div>
-      <h2>Welcome, {user?.name}</h2>
-      <p>Role: {user?.role}</p>
-
-      <button onClick={logout}>Logout</button>
-    </div>
   );
 }
