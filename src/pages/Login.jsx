@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -16,8 +16,19 @@ export default function Login() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+  // Handle OAuth callback
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) return;
+
+    localStorage.setItem("token", token);
+    fetchCurrentUser(token);
+
+    navigate("/login", { replace: true });
+  }, []);
+
   // Fetch logged-in user
-  const fetchCurrentUser = useCallback(async (token) => {
+  const fetchCurrentUser = async (token) => {
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/auth/me`, {
@@ -46,19 +57,7 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-
-  }, [API_URL, login, navigate]);
-
-  // Handle OAuth callback
-  useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) return;
-
-    localStorage.setItem("token", token);
-    fetchCurrentUser(token);
-
-    navigate("/login", { replace: true });
-  }, [fetchCurrentUser, navigate, searchParams]);
+  };
 
   // Email/password
   const handleSignIn = (e) => {
