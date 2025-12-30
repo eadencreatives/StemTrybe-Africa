@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getCourses } from '../services/courses';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
@@ -52,14 +52,8 @@ export default function Dashboard() {
     `${count} ${count === 1 ? singular : plural}`;
 
   const handleLogout = useCallback(() => logout(), [logout]);
-
-  const handleCourseSelect = (courseId) => {
-    setSelectedCourseId(courseId);
-  };
-
-  const handleOpenCourse = (course) => {
-    navigate(`/dashboard/courses/${course._id || course.id}`);
-  };
+  const handleCourseSelect = (courseId) => setSelectedCourseId(courseId);
+  const handleOpenCourse = (course) => navigate(`/dashboard/courses/${course._id || course.id}`);
 
   if (loading) {
     return <div className="dashboard-loading">Loading your courses...</div>;
@@ -67,7 +61,6 @@ export default function Dashboard() {
 
   return (
     <main className="dashboard">
-      {/* Header */}
       <header className="dashboard-header">
         <div className="header-welcome">
           <h1>Welcome, {user?.name || 'Guest'}</h1>
@@ -93,74 +86,50 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Main Layout */}
       <div className="dashboard-main">
-        {/* LEFT SIDEBAR */}
-        <aside className="courses-sidebar">
-          <div className="sidebar-header">
-            <h2>Courses ({courses.length})</h2>
+        {/* TOP: Course Selector (Vertical List Style) */}
+        <section className="courses-selector">
+          <div className="selector-header">
+            <h2>Courses ({pluralize(courses.length, 'course')})</h2>
           </div>
-          <div className="course-list">
+          <div className="courses-vertical-list">
             {filteredCourses.map(course => (
-              <button
+              <article
                 key={course._id || course.id}
-                className={`course-selector ${selectedCourseId === (course._id || course.id) ? 'active' : ''}`}
-                onClick={() => handleCourseSelect(course._id || course.id)}
+                className={`course-item ${selectedCourseId === (course._id || course.id) ? 'selected' : ''}`}
               >
-                <span className="course-number">
-                  {filteredCourses.indexOf(course) + 1}
-                </span>
-                <div className="course-info-sidebar">
-                  <div className="course-title-sidebar">{course.title}</div>
-                  <div className="course-modules-sidebar">
-                    {pluralize((course.modules || []).length, 'module')}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        {/* MAIN CONTENT */}
-        <section className="dashboard-content">
-          <section className="courses-meta">
-            <p className="count">
-              Showing {pluralize(filteredCourses.length, 'course')}
-            </p>
-          </section>
-
-          <section className="courses-grid">
-            {filteredCourses.length > 0 ? (
-              filteredCourses.map(course => (
-                <article
-                  key={course._id || course.id}
-                  className={`course-card ${selectedCourseId === (course._id || course.id) ? 'selected' : ''}`}
-                >
-                  <header className="course-header">
+                <div className="course-preview">
+                  <span className="course-number">{filteredCourses.indexOf(course) + 1}</span>
+                  <div className="course-details">
                     <h3 className="course-title">{course.title}</h3>
                     <p className="course-desc">{course.description}</p>
-                  </header>
-                  <footer className="card-footer">
-                    <button
-                      className="open-course btn"
-                      onClick={() => handleOpenCourse(course)}
-                    >
-                      Open Course →
-                    </button>
-                    <span className="modules-count">
-                      {pluralize((course.modules || []).length, 'module')}
-                    </span>
-                  </footer>
-                </article>
-              ))
-            ) : (
-              <div className="no-courses">
-                <p>{query ? `No courses match "${query}"` : 'No courses available.'}</p>
-              </div>
-            )}
-          </section>
+                  </div>
+                </div>
+                <div className="course-actions">
+                  <button
+                    className="select-btn"
+                    onClick={() => handleCourseSelect(course._id || course.id)}
+                  >
+                    Select
+                  </button>
+                  <button
+                    className="open-btn"
+                    onClick={() => handleOpenCourse(course)}
+                  >
+                    Open →
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
+
+      {filteredCourses.length === 0 && (
+        <div className="no-courses">
+          <p>{query ? `No courses match "${query}"` : 'No courses available.'}</p>
+        </div>
+      )}
     </main>
   );
 }
