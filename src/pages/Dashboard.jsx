@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getCourses } from "../services/courses";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar"; // ✅ Corrected import path
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -55,7 +55,10 @@ export default function Dashboard() {
         {/* Courses Grid */}
         <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map((c) => (
-            <article key={c._id || c.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-300">
+            <article
+              key={c._id || c.id}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-300"
+            >
               <h3 className="text-xl font-semibold mb-2 text-gray-800">{c.title}</h3>
               <p className="text-gray-600 mb-4">{c.description}</p>
               <Link
