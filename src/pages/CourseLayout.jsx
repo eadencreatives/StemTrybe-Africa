@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Outlet, Link } from "react-router-dom";
 import { useState, useEffect } from 'react';
-import { getCourse } from '../services/courses';  // ✅ Correct path
+import { getCourse } from '../services/courses';
 import './CourseLayout.css';
 
 export default function CourseLayout() {
@@ -26,19 +26,11 @@ export default function CourseLayout() {
   }, [courseId]);
 
   if (loading) {
-    return (
-      <div className="course-layout">
-        <div className="course-loading">Loading course...</div>
-      </div>
-    );
+    return <div className="course-layout"><div className="course-loading">Loading course...</div></div>;
   }
 
   if (!course) {
-    return (
-      <div className="course-layout">
-        <div className="course-error">Course not found</div>
-      </div>
-    );
+    return <div className="course-layout"><div className="course-error">Course not found</div></div>;
   }
 
   return (
@@ -64,24 +56,18 @@ export default function CourseLayout() {
         <aside className="module-sidebar" aria-label="Course modules navigation">
           <div className="sidebar-header">
             <h2>Course Modules</h2>
-            <span className="module-count">
-              {(course.modules || []).length}
-            </span>
+            <span className="module-count">{(course.modules || []).length}</span>
           </div>
           
           <nav className="module-nav">
             <ul className="module-list" role="list">
               {course.modules?.map((module, index) => {
                 const moduleSlug = module.slug || module._id || module.id || `module-${index}`;
-                const modulePath = `/dashboard/courses/${courseId}/${moduleSlug}`;
-                
                 return (
                   <li key={module._id || module.id || index} role="listitem">
                     <Link 
-                      to={modulePath}
-                      className={({ isActive }) => 
-                        `module-link ${isActive ? 'active' : ''}`
-                      }
+                      to={`/dashboard/courses/${courseId}/${moduleSlug}`}
+                      className={({ isActive }) => `module-link ${isActive ? 'active' : ''}`}
                     >
                       <span className="module-number">0{index + 1}</span>
                       <span className="module-title">{module.title}</span>
