@@ -4,10 +4,6 @@ import { getCourses } from '../services/courses';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
-/**
- * Dashboard component displaying user's courses with search and metadata
- * @component
- */
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [courses, setCourses] = useState([]);
@@ -15,7 +11,6 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
 
-  // Fetch courses with AbortController for proper cleanup
   useEffect(() => {
     const controller = new AbortController();
     
@@ -36,14 +31,11 @@ export default function Dashboard() {
     };
 
     fetchCourses();
-
     return () => controller.abort();
   }, []);
 
-  // Debounced search with useMemo for performance
   const filteredCourses = useMemo(() => {
     if (!query.trim()) return courses;
-    
     const q = query.toLowerCase();
     return courses.filter(course => 
       course.title?.toLowerCase().includes(q) ||
@@ -52,11 +44,9 @@ export default function Dashboard() {
     );
   }, [courses, query]);
 
-  // Pluralization helper
   const pluralize = (count, singular, plural = `${singular}s`) => 
     `${count} ${count === 1 ? singular : plural}`;
 
-  // Optimized logout handler
   const handleLogout = useCallback(() => {
     logout();
   }, [logout]);
@@ -81,9 +71,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="header-actions">
-          <label htmlFor="course-search" className="sr-only">
-            Search courses
-          </label>
+          <label htmlFor="course-search" className="sr-only">Search courses</label>
           <input
             id="course-search"
             aria-label="Search courses by title, description or slug"
@@ -93,11 +81,7 @@ export default function Dashboard() {
             onChange={(e) => setQuery(e.target.value)}
             type="search"
           />
-          <button
-            className="btn-logout"
-            onClick={handleLogout}
-            aria-label="Log out"
-          >
+          <button className="btn-logout" onClick={handleLogout} aria-label="Log out">
             Logout
           </button>
         </div>
@@ -132,10 +116,9 @@ export default function Dashboard() {
                 <p className="course-desc">{course.description}</p>
               </header>
               <footer className="card-footer">
-                {/* ✅ FIXED: Correct nested route path */}
                 <Link
                   className="open-course btn"
-                  to={`/dashboard/courses/${course._id || course.id}`}  {/* ← CHANGED THIS LINE */}
+                  to={`/dashboard/courses/${course._id || course.id}`}
                   aria-label={`Open course: ${course.title}`}
                 >
                   Open Course →
@@ -151,14 +134,9 @@ export default function Dashboard() {
           ))
         ) : (
           <div className="no-courses" role="status" aria-live="polite">
-            <p>
-              {query ? `No courses match "${query}"` : 'No courses available yet.'}
-            </p>
+            <p>{query ? `No courses match "${query}"` : 'No courses available yet.'}</p>
             {query && (
-              <button 
-                className="btn-clear-search" 
-                onClick={() => setQuery('')}
-              >
+              <button className="btn-clear-search" onClick={() => setQuery('')}>
                 Clear search
               </button>
             )}
