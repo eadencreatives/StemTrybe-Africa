@@ -1,5 +1,7 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+
+/* eslint-disable react-refresh/only-export-components */
 
 const AuthContext = createContext();
 
@@ -7,15 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Try to load user from localStorage on first render
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchCurrentUser(token);
-    }
-  }, []);
-
-  const fetchCurrentUser = async (token) => {
+  const fetchCurrentUser = useCallback(async (token) => {
     try {
       const res = await fetch(`${API_URL}/api/auth/me`, {
         headers: {
@@ -37,7 +31,15 @@ export const AuthProvider = ({ children }) => {
       console.error("AuthContext fetch user error:", err);
       logout();
     }
-  };
+  }, [API_URL]);
+
+  // Try to load user from localStorage on first render
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchCurrentUser(token);
+    }
+  }, [fetchCurrentUser]);
 
   const login = (userData) => {
     setUser(userData);
