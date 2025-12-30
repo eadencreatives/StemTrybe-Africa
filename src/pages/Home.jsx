@@ -4,7 +4,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate('/signup'); // or '/signin' depending on your route
+    navigate('/login');
   };
 
   return (
