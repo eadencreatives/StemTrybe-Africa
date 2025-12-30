@@ -1,6 +1,6 @@
-import { useParams, useNavigate, Outlet, Link, useLoaderData } from "react-router-dom";
+import { useParams, useNavigate, Outlet, Link } from "react-router-dom";
 import { useState, useEffect } from 'react';
-import { getCourse } from './courses';
+import { getCourse } from '../services/courses';  // ✅ Correct path
 import './CourseLayout.css';
 
 export default function CourseLayout() {
@@ -43,7 +43,6 @@ export default function CourseLayout() {
 
   return (
     <div className="course-layout">
-      {/* Course Header */}
       <header className="course-header">
         <button 
           className="back-btn"
@@ -62,7 +61,6 @@ export default function CourseLayout() {
       </header>
 
       <div className="course-content">
-        {/* Module Navigation Sidebar */}
         <aside className="module-sidebar" aria-label="Course modules navigation">
           <div className="sidebar-header">
             <h2>Course Modules</h2>
@@ -84,7 +82,6 @@ export default function CourseLayout() {
                       className={({ isActive }) => 
                         `module-link ${isActive ? 'active' : ''}`
                       }
-                      aria-current={({ isActive }) => isActive ? 'page' : undefined}
                     >
                       <span className="module-number">0{index + 1}</span>
                       <span className="module-title">{module.title}</span>
@@ -96,9 +93,8 @@ export default function CourseLayout() {
           </nav>
         </aside>
 
-        {/* Module Content Area */}
         <main className="module-content-area">
-          <Outlet /> {/* Renders ModulePage or default course overview */}
+          <Outlet />
         </main>
       </div>
     </div>
