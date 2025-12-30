@@ -19,7 +19,11 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
         const data = await getCourses({ signal: controller.signal });
-        setCourses(data || []);
+        // Filter out the specific course
+        const filteredData = (data || []).filter(course => 
+          course.title !== 'Python for Data Science — STEMtribe Africa'
+        );
+        setCourses(filteredData);
       } catch (err) {
         if (err.name !== 'AbortError') {
           setError('Failed to load courses. Please try refreshing.');
