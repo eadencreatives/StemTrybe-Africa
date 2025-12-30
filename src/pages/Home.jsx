@@ -1,4 +1,12 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate('/signup'); // or '/signin' depending on your route
+  };
+
   return (
     <>
       <main>
@@ -9,10 +17,11 @@ export default function Home() {
             Create, manage, and track courses effortlessly.
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary">Get Started Free</button>
+            <button className="btn-primary" onClick={handleGetStarted}>
+              Get Started Free
+            </button>
           </div>
         </section>
-
         <section className="features" id="features">
           <h2 className="section-title">Powerful Features for Modern Learning</h2>
           <div className="feature-grid">
@@ -24,7 +33,6 @@ export default function Home() {
                 tools. Upload videos, documents, and quizzes seamlessly.
               </p>
             </div>
-
             <div className="feature-card">
               <div className="feature-icon">📊</div>
               <h3>Analytics & Reporting</h3>
@@ -33,7 +41,6 @@ export default function Home() {
                 comprehensive reports to measure learning outcomes.
               </p>
             </div>
-
             <div className="feature-card">
               <div className="feature-icon">🎯</div>
               <h3>Personalized Learning</h3>
@@ -42,7 +49,6 @@ export default function Home() {
                 style, ensuring optimal knowledge retention.
               </p>
             </div>
-
             <div className="feature-card">
               <div className="feature-icon">💬</div>
               <h3>Interactive Discussion</h3>
@@ -51,7 +57,6 @@ export default function Home() {
                 conferencing capabilities.
               </p>
             </div>
-
             <div className="feature-card">
               <div className="feature-icon">📱</div>
               <h3>Mobile Learning</h3>
@@ -60,7 +65,6 @@ export default function Home() {
                 mobile apps for iOS and Android.
               </p>
             </div>
-
             <div className="feature-card">
               <div className="feature-icon">🔒</div>
               <h3>Enterprise Security</h3>
@@ -71,7 +75,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
         <section className="stats">
           <div className="stats-grid">
             <div className="stat-item">
@@ -92,16 +95,16 @@ export default function Home() {
             </div>
           </div>
         </section>
-
         <section className="cta">
           <h2>Ready to Transform Your Learning?</h2>
           <p>
             Join thousands of learners and organisations using STEMTRIBE Africa to deliver
             practical, skills-focused learning experiences.
           </p>
-          <button className="btn-secondary">Start Your Free Trial</button>
+          <button className="btn-secondary" onClick={handleGetStarted}>
+            Start Your Free Trial
+          </button>
         </section>
-
         <footer>
           <p>© 2025 STEMTRIBE Africa. All rights reserved. | Privacy Policy | Terms of Service</p>
         </footer>
