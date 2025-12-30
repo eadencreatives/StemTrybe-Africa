@@ -78,11 +78,11 @@ export default function Home() {
         <section className="stats">
           <div className="stats-grid">
             <div className="stat-item">
-              <h2>50K+</h2>
+              <h2>5+</h2>
               <p>Active Learners</p>
             </div>
             <div className="stat-item">
-              <h2>2,500+</h2>
+              <h2>2</h2>
               <p>Courses Available</p>
             </div>
             <div className="stat-item">
