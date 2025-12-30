@@ -31,7 +31,6 @@ export default function Dashboard() {
     if (!q) return courses;
     return courses.filter((c) => (c.title || '').toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q));
   }, [courses, query]);
-
   if (loading) return <div className="loading">Loading dashboard…</div>;
 
   return (
@@ -64,7 +63,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <section className="courses-grid" aria-live="polite">
+            <section className="courses-grid" aria-live="polite">
         {filteredCourses.map((c) => (
           <article key={c._id || c.id} className="course-card" tabIndex={0}>
             <div className="course-meta">
