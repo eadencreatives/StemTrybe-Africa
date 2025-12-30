@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getCourses } from "../services/courses";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar"; // ✅ Corrected import path
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -32,45 +34,50 @@ export default function Dashboard() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <Navbar />
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Welcome, {user?.name}</h1>
-            <p className="text-gray-600">Role: {user?.role}</p>
-          </div>
-          <button
-            onClick={logout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-300"
-          >
-            Logout
-          </button>
-        </header>
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col">
+        {/* Navbar */}
+        <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Courses Grid */}
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((c) => (
-            <article
-              key={c._id || c.id}
-              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-300"
+        <main className="flex-1 max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <header className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Welcome, {user?.name}</h1>
+              <p className="text-gray-600">Role: {user?.role}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-300"
             >
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">{c.title}</h3>
-              <p className="text-gray-600 mb-4">{c.description}</p>
-              <Link
-                to={`/courses/${c._id || c.id}`}
-                className="text-blue-600 font-medium hover:underline"
+              Logout
+            </button>
+          </header>
+
+          {/* Courses Grid */}
+          <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((c) => (
+              <article
+                key={c._id || c.id}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-300"
               >
-                Open Course
-              </Link>
-            </article>
-          ))}
-        </section>
-      </main>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">{c.title}</h3>
+                <p className="text-gray-600 mb-4">{c.description}</p>
+                <Link
+                  to={`/courses/${c._id || c.id}`}
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  Open Course
+                </Link>
+              </article>
+            ))}
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
