@@ -132,9 +132,10 @@ export default function Dashboard() {
                 <p className="course-desc">{course.description}</p>
               </header>
               <footer className="card-footer">
+                {/* ✅ FIXED: Correct nested route path */}
                 <Link
                   className="open-course btn"
-                  to={`/courses/${course._id || course.id}`}
+                  to={`/dashboard/courses/${course._id || course.id}`}  {/* ← CHANGED THIS LINE */}
                   aria-label={`Open course: ${course.title}`}
                 >
                   Open Course →
