@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { login as apiLogin, register as apiRegister } from "../services/auth";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, fetchCurrentUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -16,38 +17,7 @@ export default function Login() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch logged-in user
-  const fetchCurrentUser = useCallback(async (token) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch user");
-
-      const data = await res.json();
-      const user = data.user || data;
-
-      login({
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role || "student",
-        token,
-      });
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.error(err);
-      setMessage("Login failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-
-  }, [API_URL, login, navigate]);
+  // Note: user/profile fetch is handled by AuthContext.fetchCurrentUser
 
   // Handle OAuth callback
   useEffect(() => {
@@ -55,31 +25,54 @@ export default function Login() {
     if (!token) return;
 
     localStorage.setItem("token", token);
-    fetchCurrentUser(token);
+    // ask AuthContext to validate and populate user
+    fetchCurrentUser(token)
+      .then(() => navigate("/dashboard", { replace: true }))
+      .catch(() => setMessage("Login failed. Please try again."));
 
+    // Clean the token from URL
     navigate("/login", { replace: true });
   }, [fetchCurrentUser, navigate, searchParams]);
 
   // Email/password
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      login({ name: email.split("@")[0], role: "student", token: "abc123" });
-      navigate("/dashboard");
+    setMessage("");
+    try {
+      const res = await apiLogin({ email, password });
+      if (res && res.token && res.user) {
+        login({ id: res.user.id || res.user._id, name: res.user.name, email: res.user.email, role: res.user.role, token: res.token });
+        navigate('/dashboard');
+      } else {
+        setMessage('Login failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Sign in error', err);
+      setMessage(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("Account created — signing you in...");
-    setTimeout(() => {
-      login({ name, role: "student", token: "abc123" });
-      navigate("/dashboard");
+    setMessage('');
+    try {
+      const res = await apiRegister({ name, email, password });
+      if (res && res.token && res.user) {
+        login({ id: res.user.id || res.user._id, name: res.user.name, email: res.user.email, role: res.user.role, token: res.token });
+        navigate('/dashboard');
+      } else {
+        setMessage('Registration failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Sign up error', err);
+      setMessage(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   // OAuth redirects
