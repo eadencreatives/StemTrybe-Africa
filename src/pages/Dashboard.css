@@ -1,125 +1,101 @@
-[
-  {
-    "title": "Python for Data Science — STEMtribe Africa",
-    "slug": "python-for-data-science",
-    "description": "A gentle, rigorous introduction to Python for data science with practical examples and a capstone project.",
-    "modules": [
-      {
-        "title": "Welcome to STEMTRIBE AFRICA",
-        "order": 0,
-        "topics": [
-          {
-            "title": "Welcome note and what to expect",
-            "intro": "A short welcome video and overview of the course.",
-            "description": "Welcome to the world of Python. This course provides a fully configured environment so you can focus on learning. We'll cover syntax, data types, structures, libraries, basic ML, and a capstone.",
-            "examples": [],
-            "practiceQuestions": [],
-            "order": 0
-          }
-        ]
-      },
-      {
-        "title": "Python Syntax",
-        "order": 1,
-        "topics": [
-          {
-            "title": "Hello world & indentation",
-            "intro": "Python uses indentation for blocks and simple readable syntax.",
-            "description": "Learn how to write your first Python statement and how indentation defines code blocks.",
-            "examples": ["print(\"Hello, World!\")"],
-            "practiceQuestions": [
-              { "question": "Which symbol starts a single-line comment in Python?", "choices": ["#", "//", "/* */"], "answer": "#" }
-            ],
-            "order": 0
-          },
-          {
-            "title": "Comments and multi-line notes",
-            "intro": "Document your code with comments for clarity and collaboration.",
-            "description": "Use # for single-line comments and triple quotes for longer explanatory blocks.",
-            "examples": ["# This is a comment", "\"\"\"This is a multi-line note\"\"\""],
-            "practiceQuestions": [],
-            "order": 1
-          }
-        ]
-      },
-      {
-        "title": "Python Data Types",
-        "order": 2,
-        "topics": [
-          {
-            "title": "Numbers and strings",
-            "intro": "Understand integers, floats, and text.",
-            "description": "Use numbers for calculations and strings for text data; use type() to inspect values.",
-            "examples": ["x = 2", "y = \"Brian\"", "print(type(x))", "print(type(y))"],
-            "practiceQuestions": [],
-            "order": 0
-          },
-          {
-            "title": "Case sensitivity and naming",
-            "intro": "Variables are case-sensitive in Python.",
-            "description": "Be consistent when naming variables; a and A are distinct identifiers.",
-            "examples": ["a = 2", "A = 5", "print(a, A)"],
-            "practiceQuestions": [],
-            "order": 1
-          }
-        ]
-      },
-      {
-        "title": "Python Data Structures",
-        "order": 3,
-        "topics": [
-          {
-            "title": "Lists, tuples, dictionaries",
-            "intro": "Core collection types for organizing data.",
-            "description": "Learn when to use lists (ordered, mutable), tuples (ordered, immutable), and dicts (keyed collections).",
-            "examples": ["my_list = [1,2,3]", "my_tuple = (1,2)", "my_dict = {\"key\": \"value\"}"],
-            "practiceQuestions": [],
-            "order": 0
-          }
-        ]
-      },
-      {
-        "title": "Python Data Libraries",
-        "order": 4,
-        "topics": [
-          {
-            "title": "NumPy & pandas overview",
-            "intro": "Key libraries for numerical work and tabular data.",
-            "description": "Introduce arrays, vectorized operations and DataFrame basics used across data science and life-science workflows.",
-            "examples": ["import numpy as np", "import pandas as pd"],
-            "practiceQuestions": [],
-            "order": 0
-          }
-        ]
-      },
-      {
-        "title": "Basic Machine Learning",
-        "order": 5,
-        "topics": [
-          {
-            "title": "Intro to scikit-learn",
-            "intro": "Basic supervised models and model evaluation.",
-            "description": "Teach simple classifiers/regressors, train/test splits and evaluation metrics used in scientific projects.",
-            "examples": ["from sklearn.model_selection import train_test_split", "from sklearn.ensemble import RandomForestClassifier"],
-            "practiceQuestions": [],
-            "order": 0
-          }
-        ]
-      },
-      {
-        "title": "Python Capstone Project",
-        "order": 6,
-        "topics": [
-          {
-            "title": "Capstone: small data-science project",
-            "intro": "Apply everything you've learned on a small dataset.",
-            "description": "Design a simple analysis pipeline, produce plots, and interpret results — suitable for life-science datasets.",
-            "examples": [],
-            "practiceQuestions": [],
-            "order": 0
-          }
-        ]
-      }
-    ]
-  }
-]
+:root{
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-600: #1d4ed8;
+  --success: #10b981;
+  --shadow: 0 6px 18px rgba(15,23,42,0.08);
+}
+
+.dashboard{
+  max-width:1200px;
+  margin:24px auto;
+  padding:20px;
+}
+
+.dashboard-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:18px;
+}
+
+.header-left .welcome{
+  margin:0;
+  font-size:1.5rem;
+  color:#0f172a;
+}
+
+.muted{
+  margin:4px 0 0 0;
+  color:var(--muted);
+}
+
+.btn{
+  border:0;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:white;
+}
+
+.btn.secondary{
+  background:transparent;
+  color:var(--accent-600);
+  border:1px solid rgba(37,99,235,0.12);
+}
+
+.dashboard-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.stats{display:flex;gap:12px;align-items:center}
+.stat{background:var(--card);padding:12px 16px;border-radius:10px;box-shadow:var(--shadow);}
+.stat-value{font-size:1.25rem;font-weight:700;color:#0f172a}
+.stat-label{font-size:0.85rem;color:var(--muted)}
+
+.toolbar-actions .search{padding:10px 12px;border-radius:10px;border:1px solid #e6e9ef;min-width:260px}
+
+.courses-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px;
+}
+
+.course-card{
+  background:var(--card);
+  padding:14px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.course-card:focus,
+.course-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.12)}
+
+.course-meta{display:flex;gap:12px;align-items:flex-start}
+.course-thumb{width:64px;height:64px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7c3aed);flex:0 0 64px}
+.course-title{margin:0;font-size:1.05rem;color:#071233}
+.course-desc{margin:6px 0 0 0;color:var(--muted);font-size:0.92rem}
+
+.course-actions{display:flex;justify-content:flex-end;margin-top:14px}
+
+.loading{padding:40px;text-align:center;color:var(--muted)}
+
+@media (max-width:640px){
+  .dashboard-header{flex-direction:column;align-items:flex-start}
+  .toolbar-actions .search{min-width:100%}
+}
