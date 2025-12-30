@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses } from '../services/courses';
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +8,7 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
 
   // Fetch courses
   useEffect(() => {
@@ -24,6 +25,12 @@ export default function Dashboard() {
     })();
     return () => (mounted = false);
   }, []);
+
+  const filteredCourses = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return courses;
+    return courses.filter((c) => (c.title || '').toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q));
+  }, [courses, query]);
 
   if (loading) return <div className="loading">Loading dashboard…</div>;
 
@@ -47,12 +54,18 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="toolbar-actions">
-          <input className="search" placeholder="Search courses..." aria-label="Search courses" />
+          <input
+            className="search"
+            placeholder="Search courses..."
+            aria-label="Search courses"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
       </div>
 
       <section className="courses-grid" aria-live="polite">
-        {courses.map(c => (
+        {filteredCourses.map((c) => (
           <article key={c._id || c.id} className="course-card" tabIndex={0}>
             <div className="course-meta">
               <div className="course-thumb" aria-hidden="true" />
