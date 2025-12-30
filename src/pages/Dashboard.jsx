@@ -1,113 +1,169 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { getCourses } from '../services/courses';
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
+/**
+ * Dashboard component displaying user's courses with search and metadata
+ * @component
+ */
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState('');
 
-  // Fetch courses from API
+  // Fetch courses with AbortController for proper cleanup
   useEffect(() => {
-    let isMounted = true;
-
-    async function fetchCourses() {
+    const controller = new AbortController();
+    
+    const fetchCourses = async () => {
       try {
-        const data = await getCourses();
-        if (isMounted) setCourses(data || []);
+        setLoading(true);
+        setError(null);
+        const data = await getCourses({ signal: controller.signal });
+        setCourses(data || []);
       } catch (err) {
-        console.error('Failed to fetch courses:', err);
-        if (isMounted) setError('Failed to load courses. Please try again later.');
+        if (err.name !== 'AbortError') {
+          setError('Failed to load courses. Please try refreshing.');
+          console.error('Dashboard fetch error:', err);
+        }
       } finally {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       }
-    }
+    };
 
     fetchCourses();
-    return () => { isMounted = false; };
+
+    return () => controller.abort();
   }, []);
 
-  // Filter courses based on search query
+  // Debounced search with useMemo for performance
   const filteredCourses = useMemo(() => {
-    if (!searchQuery) return courses;
-    const query = searchQuery.toLowerCase();
-    return courses.filter(course =>
-      (course.title || '').toLowerCase().includes(query) ||
-      (course.description || '').toLowerCase().includes(query) ||
-      (course.slug || '').toLowerCase().includes(query)
+    if (!query.trim()) return courses;
+    
+    const q = query.toLowerCase();
+    return courses.filter(course => 
+      course.title?.toLowerCase().includes(q) ||
+      course.description?.toLowerCase().includes(q) ||
+      course.slug?.toLowerCase().includes(q)
     );
-  }, [courses, searchQuery]);
+  }, [courses, query]);
 
-  if (loading) return <div className="dashboard-loading">Loading dashboard…</div>;
-  if (error) return <div className="dashboard-error">{error}</div>;
+  // Pluralization helper
+  const pluralize = (count, singular, plural = `${singular}s`) => 
+    `${count} ${count === 1 ? singular : plural}`;
+
+  // Optimized logout handler
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
+
+  if (loading) {
+    return (
+      <main className="dashboard" role="main" aria-label="Loading dashboard">
+        <div className="dashboard-loading" aria-live="polite">
+          Loading your courses...
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar */}
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-user">
-          <h2>{user?.name || 'Guest'}</h2>
-          <p className="role">{user?.role || 'student'}</p>
-        </div>
-
-        <nav className="sidebar-nav">
-          <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink>
-          <NavLink to="/courses" className={({ isActive }) => isActive ? 'active' : ''}>Courses</NavLink>
-          <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>Profile</NavLink>
-          <button className="btn-logout" onClick={logout}>Logout</button>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="dashboard-main">
-        <header className="dashboard-header">
+    <main className="dashboard" role="main" aria-label="Course dashboard">
+      <header className="dashboard-header">
+        <div className="header-welcome">
           <h1>Welcome, {user?.name || 'Guest'}</h1>
-
-          <div className="header-actions">
-            <input
-              type="text"
-              aria-label="Search courses"
-              placeholder="Search courses by title, description, or slug"
-              className="course-search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </header>
-
-        {/* Courses Meta */}
-        <section className="courses-meta">
-          <p className="count">
-            Showing {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''}
+          <p className="role" aria-label={`User role: ${user?.role || 'student'}`}>
+            Role: <span aria-hidden="true">{user?.role || 'student'}</span>
           </p>
-        </section>
+        </div>
+        <div className="header-actions">
+          <label htmlFor="course-search" className="sr-only">
+            Search courses
+          </label>
+          <input
+            id="course-search"
+            aria-label="Search courses by title, description or slug"
+            className="course-search"
+            placeholder="Search courses by title or description…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            type="search"
+          />
+          <button
+            className="btn-logout"
+            onClick={handleLogout}
+            aria-label="Log out"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
 
-        {/* Courses Grid */}
-        <section className="courses-grid" aria-live="polite">
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map(course => (
-              <article key={course._id || course.id} className="course-card">
-                <h3>{course.title}</h3>
-                <p className="course-desc">{course.description}</p>
-                <div className="card-footer">
-                  <Link className="open-course" to={`/courses/${course._id || course.id}`}>
-                    Open Course
-                  </Link>
-                  <span className="modules-count">
-                    {(course.modules || []).length} module{(course.modules || []).length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-              </article>
-            ))
-          ) : (
-            <div className="no-courses">No courses found matching your search.</div>
-          )}
+      {error && (
+        <section className="error-banner" role="alert" aria-live="assertive">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="btn-retry">
+            Retry
+          </button>
         </section>
-      </main>
-    </div>
+      )}
+
+      <section className="courses-meta" aria-label="Courses metadata">
+        <p className="count" aria-live="polite">
+          Showing {pluralize(filteredCourses.length, 'course')}
+        </p>
+      </section>
+
+      <section className="courses-grid" role="grid" aria-label="Courses grid">
+        {filteredCourses.length > 0 ? (
+          filteredCourses.map(course => (
+            <article
+              key={course._id || course.id}
+              className="course-card"
+              role="gridcell"
+              tabIndex={0}
+            >
+              <header className="course-header">
+                <h3 className="course-title">{course.title}</h3>
+                <p className="course-desc">{course.description}</p>
+              </header>
+              <footer className="card-footer">
+                <Link
+                  className="open-course btn"
+                  to={`/courses/${course._id || course.id}`}
+                  aria-label={`Open course: ${course.title}`}
+                >
+                  Open Course →
+                </Link>
+                <span 
+                  className="modules-count" 
+                  aria-label={`${pluralize((course.modules || []).length, 'module')} available`}
+                >
+                  {pluralize((course.modules || []).length, 'module')}
+                </span>
+              </footer>
+            </article>
+          ))
+        ) : (
+          <div className="no-courses" role="status" aria-live="polite">
+            <p>
+              {query ? `No courses match "${query}"` : 'No courses available yet.'}
+            </p>
+            {query && (
+              <button 
+                className="btn-clear-search" 
+                onClick={() => setQuery('')}
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
