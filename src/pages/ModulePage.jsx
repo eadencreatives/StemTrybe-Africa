@@ -1,57 +1,43 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
-import TopicContent from '../components/TopicContent';
-import PrevNext from '../components/PrevNext';
+import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import './ModulePage.css';
 
 export default function ModulePage() {
-  const { id, moduleIndex, topicIndex } = useParams();
-  const navigate = useNavigate();
+  const { courseId, moduleId } = useParams();
   const [module, setModule] = useState(null);
-  const [topicIdx, setTopicIdx] = useState(topicIndex ? parseInt(topicIndex, 10) : 0);
-  const [courseTitle, setCourseTitle] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await api.get(`/courses/${id}`);
-        if (!mounted) return;
-        const c = res.data;
-        setCourseTitle(c.title);
-        const m = c.modules[parseInt(moduleIndex, 10)];
-        setModule(m);
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-    return () => (mounted = false);
-  }, [id, moduleIndex]);
+    // Simulate module loading - replace with your API
+    setTimeout(() => {
+      setModule({
+        title: `Module ${moduleId}`,
+        content: `Content for ${moduleId} goes here. This is where your STEMtribe Africa course materials will appear - videos, code editors, quizzes, etc.`
+      });
+      setLoading(false);
+    }, 500);
+  }, [moduleId]);
 
-  if (!module) return <div>Loading module…</div>;
-
-  const topic = module.topics[topicIdx] || module.topics[0];
-
-  const goTopic = (nextIdx) => {
-    if (nextIdx < 0 || nextIdx >= module.topics.length) return;
-    navigate(`/courses/${id}/module/${moduleIndex}/topic/${nextIdx}`);
-  };
+  if (loading) return <div className="module-loading">Loading module content...</div>;
 
   return (
-    <main className="module-page">
-      <header>
-        <h1>{courseTitle} — {module.title}</h1>
-        <Link to={`/courses/${id}`}>Back to course</Link>
+    <article className="module-page">
+      <header className="module-header">
+        <h2>{module?.title}</h2>
       </header>
-
-      <TopicContent topic={topic} />
-
-      <PrevNext
-        current={topicIdx}
-        total={(module.topics && module.topics.length) || 0}
-        onPrev={() => goTopic(topicIdx - 1)}
-        onNext={() => goTopic(topicIdx + 1)}
-      />
-    </main>
+      <div className="module-body">
+        <div className="module-content">
+          <div className="module-text">{module?.content}</div>
+          <section className="module-resources">
+            <h3>Resources</h3>
+            <ul>
+              <li>📚 Code examples</li>
+              <li>✏️ Practice exercises</li>
+              <li>📥 Download materials</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </article>
   );
 }
