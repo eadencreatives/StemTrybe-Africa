@@ -1,127 +1,166 @@
-/* Dashboard Main Layout */
-.dashboard-main {
-  display: flex;
-  gap: 24px;
-  min-height: 60vh;
-}
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getCourses } from '../services/courses';
+import { useAuth } from '../context/AuthContext';
+import './Dashboard.css';
 
-/* Courses Sidebar */
-.courses-sidebar {
-  width: 320px;
-  flex-shrink: 0;
-  background: var(--card);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow);
-  height: fit-content;
-}
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [query, setQuery] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
 
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getCourses({ signal: controller.signal });
+        const filteredData = (data || []).filter(course => 
+          course.title !== 'Python for Data Science — STEMtribe Africa'
+        );
+        setCourses(filteredData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError('Failed to load courses. Please try refreshing.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-.sidebar-header h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #0f172a;
-}
+    fetchCourses();
+    return () => controller.abort();
+  }, []);
 
-.course-nav {
-  height: 100%;
-}
+  const filteredCourses = useMemo(() => {
+    if (!query.trim()) return courses;
+    const q = query.toLowerCase();
+    return courses.filter(course => 
+      course.title?.toLowerCase().includes(q) ||
+      course.description?.toLowerCase().includes(q) ||
+      course.slug?.toLowerCase().includes(q)
+    );
+  }, [courses, query]);
 
-.course-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 500px;
-  overflow-y: auto;
-}
+  const pluralize = (count, singular, plural = `${singular}s`) => 
+    `${count} ${count === 1 ? singular : plural}`;
 
-.course-selector {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 14px 16px;
-  text-align: left;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
-}
+  const handleLogout = useCallback(() => logout(), [logout]);
 
-.course-selector:hover {
-  background: rgba(37, 99, 235, 0.08);
-}
+  const handleCourseSelect = (courseId) => {
+    setSelectedCourseId(courseId);
+  };
 
-.course-selector.active {
-  background: var(--accent);
-  color: white;
-}
+  const handleOpenCourse = (course) => {
+    navigate(`/dashboard/courses/${course._id || course.id}`);
+  };
 
-.course-number {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--success);
-  min-width: 36px;
-  text-align: center;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.course-info-sidebar {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.course-title-sidebar {
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: block;
-}
-
-.course-modules-sidebar {
-  font-size: 0.8rem;
-  color: var(--muted);
-  opacity: 0.8;
-}
-
-/* Main Content Area */
-.dashboard-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.course-card.selected {
-  border: 2px solid var(--accent);
-  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .dashboard-main {
-    flex-direction: column;
+  if (loading) {
+    return <div className="dashboard-loading">Loading your courses...</div>;
   }
-  
-  .courses-sidebar {
-    width: 100%;
-    order: 2;
-  }
-}
 
-@media (max-width: 768px) {
-  .courses-sidebar {
-    padding: 20px;
-  }
+  return (
+    <main className="dashboard">
+      {/* Header */}
+      <header className="dashboard-header">
+        <div className="header-welcome">
+          <h1>Welcome, {user?.name || 'Guest'}</h1>
+          <p className="role">Role: {user?.role || 'student'}</p>
+        </div>
+        <div className="header-actions">
+          <input
+            className="course-search"
+            placeholder="Search courses…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <button className="btn-logout" onClick={handleLogout}>Logout</button>
+        </div>
+      </header>
+
+      {error && (
+        <section className="error-banner">
+          <p>{error}</p>
+          <button className="btn-retry" onClick={() => window.location.reload()}>
+            Retry
+          </button>
+        </section>
+      )}
+
+      {/* Main Layout */}
+      <div className="dashboard-main">
+        {/* LEFT SIDEBAR */}
+        <aside className="courses-sidebar">
+          <div className="sidebar-header">
+            <h2>Courses ({courses.length})</h2>
+          </div>
+          <div className="course-list">
+            {filteredCourses.map(course => (
+              <button
+                key={course._id || course.id}
+                className={`course-selector ${selectedCourseId === (course._id || course.id) ? 'active' : ''}`}
+                onClick={() => handleCourseSelect(course._id || course.id)}
+              >
+                <span className="course-number">
+                  {filteredCourses.indexOf(course) + 1}
+                </span>
+                <div className="course-info-sidebar">
+                  <div className="course-title-sidebar">{course.title}</div>
+                  <div className="course-modules-sidebar">
+                    {pluralize((course.modules || []).length, 'module')}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <section className="dashboard-content">
+          <section className="courses-meta">
+            <p className="count">
+              Showing {pluralize(filteredCourses.length, 'course')}
+            </p>
+          </section>
+
+          <section className="courses-grid">
+            {filteredCourses.length > 0 ? (
+              filteredCourses.map(course => (
+                <article
+                  key={course._id || course.id}
+                  className={`course-card ${selectedCourseId === (course._id || course.id) ? 'selected' : ''}`}
+                >
+                  <header className="course-header">
+                    <h3 className="course-title">{course.title}</h3>
+                    <p className="course-desc">{course.description}</p>
+                  </header>
+                  <footer className="card-footer">
+                    <button
+                      className="open-course btn"
+                      onClick={() => handleOpenCourse(course)}
+                    >
+                      Open Course →
+                    </button>
+                    <span className="modules-count">
+                      {pluralize((course.modules || []).length, 'module')}
+                    </span>
+                  </footer>
+                </article>
+              ))
+            ) : (
+              <div className="no-courses">
+                <p>{query ? `No courses match "${query}"` : 'No courses available.'}</p>
+              </div>
+            )}
+          </section>
+        </section>
+      </div>
+    </main>
+  );
 }
