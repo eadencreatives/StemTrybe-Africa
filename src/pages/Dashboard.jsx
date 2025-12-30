@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getCourses } from '../services/courses';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,18 +52,22 @@ export default function Dashboard() {
     `${count} ${count === 1 ? singular : plural}`;
 
   const handleLogout = useCallback(() => logout(), [logout]);
-  const handleCourseSelect = (courseId) => setSelectedCourseId(courseId);
+
+  const handleCourseSelect = (courseId) => {
+    setSelectedCourseId(courseId);
+  };
+
+  const handleOpenCourse = (course) => {
+    navigate(`/dashboard/courses/${course._id || course.id}`);
+  };
 
   if (loading) {
-    return (
-      <main className="dashboard">
-        <div className="dashboard-loading">Loading your courses...</div>
-      </main>
-    );
+    return <div className="dashboard-loading">Loading your courses...</div>;
   }
 
   return (
     <main className="dashboard">
+      {/* Header */}
       <header className="dashboard-header">
         <div className="header-welcome">
           <h1>Welcome, {user?.name || 'Guest'}</h1>
@@ -82,70 +87,82 @@ export default function Dashboard() {
       {error && (
         <section className="error-banner">
           <p>{error}</p>
-          <button className="btn-retry" onClick={() => window.location.reload()}>Retry</button>
+          <button className="btn-retry" onClick={() => window.location.reload()}>
+            Retry
+          </button>
         </section>
       )}
 
-      {/* TOP: Course Selector Sidebar */}
-      <section className="courses-sidebar">
-        <div className="sidebar-header">
-          <h2>All Courses ({pluralize(courses.length, 'course')})</h2>
-        </div>
-        <div className="course-list">
-          {filteredCourses.map(course => (
-            <button
-              key={course._id || course.id}
-              className={`course-selector-btn ${selectedCourseId === (course._id || course.id) ? 'active' : ''}`}
-              onClick={() => handleCourseSelect(course._id || course.id)}
-            >
-              <span className="course-number">{filteredCourses.indexOf(course) + 1}</span>
-              <span className="course-title-list">{course.title}</span>
-              <span className="course-modules-list">
-                {pluralize((course.modules || []).length, 'module')}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* BOTTOM: ORIGINAL GRID CARDS */}
-      <section className="courses-grid-section">
-        <section className="courses-meta">
-          <p className="count">Showing {pluralize(filteredCourses.length, 'course')}</p>
-        </section>
-
-        <section className="courses-grid" role="grid">
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map(course => (
-              <article
+      {/* Main Layout */}
+      <div className="dashboard-main">
+        {/* LEFT SIDEBAR */}
+        <aside className="courses-sidebar">
+          <div className="sidebar-header">
+            <h2>Courses ({courses.length})</h2>
+          </div>
+          <div className="course-list">
+            {filteredCourses.map(course => (
+              <button
                 key={course._id || course.id}
-                className={`course-card ${selectedCourseId === (course._id || course.id) ? 'selected' : ''}`}
-                role="gridcell"
+                className={`course-selector ${selectedCourseId === (course._id || course.id) ? 'active' : ''}`}
+                onClick={() => handleCourseSelect(course._id || course.id)}
               >
-                <header className="course-header">
-                  <h3 className="course-title">{course.title}</h3>
-                  <p className="course-desc">{course.description}</p>
-                </header>
-                <footer className="card-footer">
-                  <Link
-                    className="open-course"
-                    to={`/dashboard/courses/${course._id || course.id}`}
-                  >
-                    Open Course →
-                  </Link>
-                  <span className="modules-count">
+                <span className="course-number">
+                  {filteredCourses.indexOf(course) + 1}
+                </span>
+                <div className="course-info-sidebar">
+                  <div className="course-title-sidebar">{course.title}</div>
+                  <div className="course-modules-sidebar">
                     {pluralize((course.modules || []).length, 'module')}
-                  </span>
-                </footer>
-              </article>
-            ))
-          ) : (
-            <div className="no-courses">
-              <p>{query ? `No courses match "${query}"` : 'No courses available.'}</p>
-            </div>
-          )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <section className="dashboard-content">
+          <section className="courses-meta">
+            <p className="count">
+              Showing {pluralize(filteredCourses.length, 'course')}
+            </p>
+          </section>
+
+          <section className="courses-grid">
+            {filteredCourses.length > 0 ? (
+              filteredCourses.map(course => (
+                <article
+                  key={course._id || course.id}
+                  className={`course-card ${selectedCourseId === (course._id || course.id) ? 'selected' : ''}`}
+                >
+                  <header className="course-header">
+                    <h3 className="course-title">{course.title}</h3>
+                    <p className="course-desc">{course.description}</p>
+                  </header>
+                  <footer className="card-footer">
+                    <button
+                      className="open-course btn"
+                      onClick={() => handleOpenCourse(course)}
+                    >
+                      Open Course →
+                    </button>
+                    <span className="modules-count">
+                      {pluralize((course.modules || []).length, 'module')}
+                    </span>
+                  </footer>
+                </article>
+              ))
+            ) : (
+              <div className="no-courses">
+                <p>{query ? `No courses match "${query}"` : 'No courses available.'}</p>
+              </div>
+            )}
+          </section>
         </section>
-      </section>
+      </div>
     </main>
   );
 }
+
+
