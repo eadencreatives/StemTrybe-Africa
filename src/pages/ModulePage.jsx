@@ -8,7 +8,7 @@ export default function ModulePage() {
   const { id, moduleIndex, topicIndex } = useParams();
   const navigate = useNavigate();
   const [module, setModule] = useState(null);
-  const [topicIdx, setTopicIdx] = useState(topicIndex ? parseInt(topicIndex, 10) : 0);
+  const topicIdx = topicIndex ? parseInt(topicIndex, 10) : 0;
   const [courseTitle, setCourseTitle] = useState('');
 
   useEffect(() => {
