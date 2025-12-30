@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses } from '../services/courses';
 import { useAuth } from "../context/AuthContext";
+import './Dashboard.css';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -24,22 +25,46 @@ export default function Dashboard() {
     return () => (mounted = false);
   }, []);
 
-  if (loading) return <div>Loading dashboard…</div>;
+  if (loading) return <div className="loading">Loading dashboard…</div>;
 
   return (
     <main className="dashboard">
-      <header>
-        <h1>Welcome, {user?.name}</h1>
-        <p>Role: {user?.role}</p>
-        <button onClick={logout}>Logout</button>
-      </header>
+      <div className="dashboard-header">
+        <div className="header-left">
+          <h1 className="welcome">Welcome back, {user?.name}</h1>
+          <p className="muted">Role: <strong>{user?.role}</strong></p>
+        </div>
+        <div className="header-right">
+          <button className="btn secondary" onClick={logout}>Logout</button>
+        </div>
+      </div>
 
-      <section className="courses-grid">
+      <div className="dashboard-toolbar">
+        <div className="stats">
+          <div className="stat">
+            <div className="stat-value">{courses.length}</div>
+            <div className="stat-label">Courses</div>
+          </div>
+        </div>
+        <div className="toolbar-actions">
+          <input className="search" placeholder="Search courses..." aria-label="Search courses" />
+        </div>
+      </div>
+
+      <section className="courses-grid" aria-live="polite">
         {courses.map(c => (
-          <article key={c._id || c.id} className="course-card">
-            <h3>{c.title}</h3>
-            <p>{c.description}</p>
-            <Link to={`/courses/${c._id || c.id}`}>Open Course</Link>
+          <article key={c._id || c.id} className="course-card" tabIndex={0}>
+            <div className="course-meta">
+              <div className="course-thumb" aria-hidden="true" />
+              <div className="course-info">
+                <h3 className="course-title">{c.title}</h3>
+                <p className="course-desc">{c.description}</p>
+              </div>
+            </div>
+
+            <div className="course-actions">
+              <Link className="btn primary" to={`/courses/${c._id || c.id}`}>Open Course</Link>
+            </div>
           </article>
         ))}
       </section>
