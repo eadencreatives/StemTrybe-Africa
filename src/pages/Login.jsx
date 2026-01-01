@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import hb_logo from '../../../assets/logo.svg';
+import logo from '../../../assets/logo.svg'; // Fixed import
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
