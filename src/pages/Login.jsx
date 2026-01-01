@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
-// Import shadcn/ui components (install: npx shadcn-ui@latest add button input label card toast)
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { toast } from "sonner"; // npm i sonner
+import { toast } from "sonner";
 
 export default function Login() {
   const { login } = useAuth();
