@@ -21,7 +21,9 @@ export default function Login() {
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Failed to fetch user");
@@ -52,6 +54,7 @@ export default function Login() {
 
     localStorage.setItem("token", token);
     fetchCurrentUser(token);
+
     navigate("/login", { replace: true });
   }, [fetchCurrentUser, navigate, searchParams]);
 
@@ -88,9 +91,9 @@ export default function Login() {
     <main className="auth-page">
       <div className="auth-container">
         <div className="auth-card">
-
-          {/* LOGO */}
-          <img src={logo} alt="STEMTRIBE Africa Logo" className="auth-logo" />
+          <div className="logo-circle">
+            <img src={logo} alt="STEMTRIBE Africa Logo" />
+          </div>
 
           <h1 className="brand-name">STEMTRIBE Africa</h1>
 
