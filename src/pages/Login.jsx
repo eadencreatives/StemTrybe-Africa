@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import logo from '../../../assets/logo.svg'; // Fixed import
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -96,7 +95,7 @@ export default function Login() {
     <main className="auth-page">
       <div className="auth-container">
         <div className="auth-card">
-          <Image src={logo} alt='jisender-logo' height={40} width={40} /> 
+          <div className="logo-circle">
             <span>ST</span>
           </div>
           
